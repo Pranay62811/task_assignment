@@ -1,0 +1,26 @@
+name: pushtoec2
+
+on: push
+
+jobs:
+  deploy:
+    name: Push to EC2 Instance
+    runs-on: linux-latest
+
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v1
+
+      - name: Build the docker image
+        uses: docker build -t nginx_pranay .
+
+      - name: Run the docker image
+        uses: docker run --name mynginx3 -p 80:80 -d nginx_pranay
+        
+      - name: Deploy to my EC2 instance
+        uses: easingthemes/ssh-deploy@v2.1.5
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          SOURCE: "./"
+          REMOTE_HOST: "ec2-100-26-208-25.compute-1.amazonaws.com"
+          REMOTE_USER: "ec2-user"
